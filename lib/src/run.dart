@@ -225,7 +225,7 @@ class Screenshots {
           if (Intl.canonicalizedLocale(config.locales[0]) ==
               Intl.canonicalizedLocale(utils.getIosSimulatorLocale(deviceId))) {
             printStatus('Starting $configDeviceName...');
-            await startSimulator(daemonClient, deviceId);
+            await startSimulator(daemonClient, config.stagingDir, deviceId);
           } else {
             pendingIosLocaleChangeAtStart = true;
             printTrace(
@@ -301,8 +301,8 @@ class Screenshots {
               // restart simulator
               printStatus(
                   'Restarting \'$configDeviceName\' due to locale change...');
-              await shutdownSimulator(deviceId);
-              await startSimulator(daemonClient, deviceId);
+              await shutdownSimulator(config.stagingDir, deviceId);
+              await startSimulator(daemonClient, config.stagingDir, deviceId);
             }
           }
           if (pendingIosLocaleChangeAtStart) {
@@ -310,7 +310,7 @@ class Screenshots {
             await setSimulatorLocale(deviceId, configDeviceName, locale,
                 config.stagingDir, daemonClient);
             printStatus('Starting $configDeviceName...');
-            await startSimulator(daemonClient, deviceId);
+            await startSimulator(daemonClient, config.stagingDir, deviceId);
             pendingIosLocaleChangeAtStart = false;
           }
 
@@ -379,7 +379,7 @@ class Screenshots {
           // todo restore backup of GlobalPreferences.plist
           await setSimulatorLocale(deviceId, configDeviceName, origIosLocale,
               config.stagingDir, daemonClient);
-          await shutdownSimulator(deviceId);
+          await shutdownSimulator(config.stagingDir, deviceId);
         }
       }
     }
@@ -421,15 +421,16 @@ class Screenshots {
   }
 }
 
-Future<void> shutdownSimulator(String deviceId) async {
-  utils.cmd(['xcrun', 'simctl', 'shutdown', deviceId]);
+Future<void> shutdownSimulator(String stagingDir, String deviceId) async {
+  utils.cmd(['$stagingDir/resources/script/simulator-controller', deviceId, 'shutdown']);
   // shutdown apparently needs time when restarting
   // see https://github.com/flutter/flutter/issues/10228 for race condition on simulator
   await Future.delayed(Duration(milliseconds: 2000));
 }
 
-Future<void> startSimulator(DaemonClient daemonClient, String deviceId) async {
-  utils.cmd(['xcrun', 'simctl', 'boot', deviceId]);
+Future<void> startSimulator(DaemonClient daemonClient, String stagingDir, String deviceId) async {
+  utils.cmd(['$stagingDir/resources/script/simulator-controller', deviceId, 'open']);
+  utils.cmd(['$stagingDir/resources/script/simulator-controller', deviceId, 'boot']);
   await Future.delayed(Duration(milliseconds: 2000));
   await waitForEmulatorToStart(daemonClient, deviceId);
 }

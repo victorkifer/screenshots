@@ -92,7 +92,14 @@ delete () {
 boot () {
   SIMULATOR_ID=$( get_uid )
   exit_if_no_simulator
-  xcrun simctl boot $SIMULATOR_ID
+  SIMULATOR_STATUS=$(get_status)
+  echo "Booting simulator $SIMULATOR_ID. Current status: $SIMULATOR_STATUS"
+  if [ "$SIMULATOR_STATUS" != "Booted" ]; then
+    EXIT_CODE=$(xcrun simctl boot $SIMULATOR_ID)
+    if [ $EXIT_CODE -ne 0 ] && [ $EXIT_CODE -ne 165 ]; then
+      exit $EXIT_CODE
+    fi
+  fi
 }
 
 open_simulator () {
