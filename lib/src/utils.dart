@@ -11,6 +11,7 @@ import 'package:yaml/yaml.dart';
 
 import 'context_runner.dart';
 import 'globals.dart';
+import 'plist.dart' as plist;
 
 /// Parse a yaml file.
 Map parseYamlFile(String yamlPath) =>
@@ -241,8 +242,8 @@ String getIosSimulatorLocale(String udId) {
     globalPreferences.writeAsStringSync(contents);
     cmd(['plutil', '-convert', 'binary1', globalPreferences.path]);
   }
-  final localeInfo = cnv.jsonDecode(
-      cmd(['plutil', '-convert', 'json', '-o', '-', globalPreferencesPath]));
+  final localeInfo = plist.parse(
+      cmd(['plutil', '-convert', 'xml1', '-o', '-', globalPreferencesPath]));
   final locale = localeInfo['AppleLocale'];
   return locale;
 }
