@@ -122,7 +122,7 @@ class Config {
   /// Records screenshots environment before start of each test
   /// (called by screenshots)
   @visibleForTesting
-  Future<void> storeEnv(Screens screens, String emulatorName, String locale,
+  Future<void> storeEnv(Screens screens, String emulatorId, String emulatorName, String locale,
       DeviceType deviceType, Orientation orientation) async {
     // store env for later use by tests
     final screenProps = screens.getScreen(emulatorName);
@@ -130,6 +130,7 @@ class Config {
     final currentEnv = {
       'screen_size': screenSize,
       'locale': locale,
+      'device_id': emulatorId,
       'device_name': emulatorName,
       'device_type': utils.getStringFromEnum(deviceType),
       'orientation': utils.getStringFromEnum(orientation)

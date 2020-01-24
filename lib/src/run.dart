@@ -347,7 +347,7 @@ class Screenshots {
               // store env for later use by tests
               // ignore: invalid_use_of_visible_for_testing_member
               await config.storeEnv(
-                  screens, configDeviceName, locale, deviceType, orientation);
+                  screens, deviceId, configDeviceName, locale, deviceType, orientation);
 
               // run tests and process images
               await runProcessTests(

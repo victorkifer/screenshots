@@ -15,6 +15,7 @@ Future screenshot(final driver, Config config, String name,
       await driver.waitUntilNoTransientCallbacks(timeout: timeout);
     }
 
+    final deviceId = (await config.screenshotsEnv)["device_id"];
     final deviceType = (await config.screenshotsEnv)["device_type"];
     final isAndroid = deviceType == "android";
 
@@ -22,25 +23,25 @@ Future screenshot(final driver, Config config, String name,
     final file = await File('$testDir/$name.$kImageExtension').create(recursive: true);
 
     if (isAndroid) {
-      print("Creating screenshot using ADB");
-      await Process.run('adb', ['shell', 'settings', 'put', 'global', 'window_animation_scale', '0.0']);
-      await Process.run('adb', ['shell', 'settings', 'put', 'global', 'transition_animation_scale', '0.0']);
-      await Process.run('adb', ['shell', 'settings', 'put', 'global', 'animator_duration_scale', '0.0']);
-      await Process.run('adb', ['shell', 'settings', 'put', 'global', 'sysui_demo_allowed', '1']);
-      await Process.run('adb', ['shell', 'am', 'broadcast', '-a', 'com.android.systemui.demo', '-e', 'command', 'enter']);
-      await Process.run('adb', ['shell', 'am', 'broadcast', '-a', 'com.android.systemui.demo', '-e', 'command', 'clock', '-e', 'hhmm', '0800']);
-      await Process.run('adb', ['shell', 'am', 'broadcast', '-a', 'com.android.systemui.demo', '-e', 'command', 'battery', '-e', 'level', '100']);
-      await Process.run('adb', ['shell', 'am', 'broadcast', '-a', 'com.android.systemui.demo', '-e', 'command', 'network', '-e', 'wifi', 'show', '-e', 'level', '4']);
-      await Process.run('adb', ['shell', 'am', 'broadcast', '-a', 'com.android.systemui.demo', '-e', 'command', 'network', '-e', 'mobile', 'show', '-e', 'datatype', 'lte', '-e', 'level', '4']);
-      await Process.run('adb', ['shell', 'am', 'broadcast', '-a', 'com.android.systemui.demo', '-e', 'command', 'notifications', '-e', 'visible', 'false']);
+      print("Creating Android screenshots on $deviceId using ADB");
+      await Process.run('adb', ['-s', deviceId, 'shell', 'settings', 'put', 'global', 'window_animation_scale', '0.0']);
+      await Process.run('adb', ['-s', deviceId, 'shell', 'settings', 'put', 'global', 'transition_animation_scale', '0.0']);
+      await Process.run('adb', ['-s', deviceId, 'shell', 'settings', 'put', 'global', 'animator_duration_scale', '0.0']);
+      await Process.run('adb', ['-s', deviceId, 'shell', 'settings', 'put', 'global', 'sysui_demo_allowed', '1']);
+      await Process.run('adb', ['-s', deviceId, 'shell', 'am', 'broadcast', '-a', 'com.android.systemui.demo', '-e', 'command', 'enter']);
+      await Process.run('adb', ['-s', deviceId, 'shell', 'am', 'broadcast', '-a', 'com.android.systemui.demo', '-e', 'command', 'clock', '-e', 'hhmm', '0800']);
+      await Process.run('adb', ['-s', deviceId, 'shell', 'am', 'broadcast', '-a', 'com.android.systemui.demo', '-e', 'command', 'battery', '-e', 'level', '100']);
+      await Process.run('adb', ['-s', deviceId, 'shell', 'am', 'broadcast', '-a', 'com.android.systemui.demo', '-e', 'command', 'network', '-e', 'wifi', 'show', '-e', 'level', '4']);
+      await Process.run('adb', ['-s', deviceId, 'shell', 'am', 'broadcast', '-a', 'com.android.systemui.demo', '-e', 'command', 'network', '-e', 'mobile', 'show', '-e', 'datatype', 'lte', '-e', 'level', '4']);
+      await Process.run('adb', ['-s', deviceId, 'shell', 'am', 'broadcast', '-a', 'com.android.systemui.demo', '-e', 'command', 'notifications', '-e', 'visible', 'false']);
 
-      final screenshotResult = await Process.run('adb', ['exec-out', 'screencap', '-p'], stdoutEncoding: null);
+      final screenshotResult = await Process.run('adb', ['-s', deviceId, 'exec-out', 'screencap', '-p'], stdoutEncoding: null);
       await file.writeAsBytes(screenshotResult.stdout);
 
-      await Process.run('adb', ['shell', 'am', 'broadcast', '-a', 'com.android.systemui.demo', '-e', 'command', 'exit']);
-      await Process.run('adb', ['shell', 'settings', 'put', 'global', 'window_animation_scale', '1.0']);
-      await Process.run('adb', ['shell', 'settings', 'put', 'global', 'transition_animation_scale', '1.0']);
-      await Process.run('adb', ['shell', 'settings', 'put', 'global', 'animator_duration_scale', '1.0']);
+      await Process.run('adb', ['-s', deviceId, 'shell', 'am', 'broadcast', '-a', 'com.android.systemui.demo', '-e', 'command', 'exit']);
+      await Process.run('adb', ['-s', deviceId, 'shell', 'settings', 'put', 'global', 'window_animation_scale', '1.0']);
+      await Process.run('adb', ['-s', deviceId, 'shell', 'settings', 'put', 'global', 'transition_animation_scale', '1.0']);
+      await Process.run('adb', ['-s', deviceId, 'shell', 'settings', 'put', 'global', 'animator_duration_scale', '1.0']);
     } else {
       print("Creating screenshot using FLUTTER DRIVER");
       final pixels = await driver.screenshot();
