@@ -18,6 +18,7 @@ Future screenshot(final driver, Config config, String name,
     final deviceId = (await config.screenshotsEnv)["device_id"];
     final deviceType = (await config.screenshotsEnv)["device_type"];
     final isAndroid = deviceType == "android";
+    final isIOS = deviceType == "ios";
 
     final testDir = '${config.stagingDir}/$kTestScreenshotsDir';
     final file = await File('$testDir/$name.$kImageExtension').create(recursive: true);
@@ -42,6 +43,9 @@ Future screenshot(final driver, Config config, String name,
       await Process.run('adb', ['-s', deviceId, 'shell', 'settings', 'put', 'global', 'window_animation_scale', '1.0']);
       await Process.run('adb', ['-s', deviceId, 'shell', 'settings', 'put', 'global', 'transition_animation_scale', '1.0']);
       await Process.run('adb', ['-s', deviceId, 'shell', 'settings', 'put', 'global', 'animator_duration_scale', '1.0']);
+    } else if (isIOS) {
+      print("Creating iOS screenshots on $deviceId using xcrun simctl");
+      await Process.run('xcrun', ['simctl', 'io', deviceId, 'screenshot', file.absolute.path]);
     } else {
       print("Creating screenshot using FLUTTER DRIVER");
       final pixels = await driver.screenshot();
