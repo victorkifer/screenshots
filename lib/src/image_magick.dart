@@ -87,6 +87,16 @@ class ImageMagick {
     _imageMagickCmd('convert', cmdOptions);
   }
 
+  void rotate(String imagePath, int degrees) {
+    final cmdOptions = [
+      imagePath,
+      '-rotate',
+      degrees.toString(),
+      imagePath
+    ];
+    _imageMagickCmd('convert', cmdOptions);
+  }
+
   /// Checks if brightness of sample of image exceeds a threshold.
   /// Section is specified by [cropSizeOffset] which is of the form
   /// cropSizeOffset, eg, '1242x42+0+0'.

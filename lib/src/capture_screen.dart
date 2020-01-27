@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'config.dart';
 import 'globals.dart';
+import 'image_magick.dart';
+import 'context_runner.dart';
 
 /// Called by integration test to capture images.
 Future screenshot(final driver, Config config, String name,
@@ -15,8 +17,11 @@ Future screenshot(final driver, Config config, String name,
       await driver.waitUntilNoTransientCallbacks(timeout: timeout);
     }
 
-    final deviceId = (await config.screenshotsEnv)["device_id"];
-    final deviceType = (await config.screenshotsEnv)["device_type"];
+    final env = await config.screenshotsEnv;
+    final deviceId = env["device_id"];
+    final deviceType = env["device_type"];
+    final orientation = env["orientation"];
+    final locale = env["locale"];
     final isAndroid = deviceType == "android";
     final isIOS = deviceType == "ios";
 
@@ -24,7 +29,7 @@ Future screenshot(final driver, Config config, String name,
     final file = await File('$testDir/$name.$kImageExtension').create(recursive: true);
 
     if (isAndroid) {
-      print("Creating Android screenshots on $deviceId using ADB");
+      print("Creating Android screenshots on $deviceId with orientation $orientation for locale $locale using ADB");
       await Process.run('adb', ['-s', deviceId, 'shell', 'settings', 'put', 'global', 'window_animation_scale', '0.0']);
       await Process.run('adb', ['-s', deviceId, 'shell', 'settings', 'put', 'global', 'transition_animation_scale', '0.0']);
       await Process.run('adb', ['-s', deviceId, 'shell', 'settings', 'put', 'global', 'animator_duration_scale', '0.0']);
@@ -44,8 +49,17 @@ Future screenshot(final driver, Config config, String name,
       await Process.run('adb', ['-s', deviceId, 'shell', 'settings', 'put', 'global', 'transition_animation_scale', '1.0']);
       await Process.run('adb', ['-s', deviceId, 'shell', 'settings', 'put', 'global', 'animator_duration_scale', '1.0']);
     } else if (isIOS) {
-      print("Creating iOS screenshots on $deviceId using xcrun simctl");
+      print("Creating iOS screenshots on $deviceId with orientation $orientation for locale $locale using xcrun simctl");
       await Process.run('xcrun', ['simctl', 'io', deviceId, 'screenshot', file.absolute.path]);
+      await runInContext<bool>(() async {
+        if (orientation == "LandscapeRight") {
+          im.rotate(file.absolute.path, 90);
+        } else if (orientation == "PortraitUpsideDown") {
+          im.rotate(file.absolute.path, 180);
+        } else if (orientation == "LandscapeLeft") {
+          im.rotate(file.absolute.path, 270);
+        }
+      });
     } else {
       print("Creating screenshot using FLUTTER DRIVER");
       final pixels = await driver.screenshot();
