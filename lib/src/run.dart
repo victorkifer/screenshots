@@ -284,10 +284,13 @@ class Screenshots {
           origIosLocale = utils.getIosSimulatorLocale(deviceId);
         }
 
+        changeAndroidAnimationScale(deviceId, false);
+
         for (final locale in config.locales) {
           // set locale if android device or emulator
           if (isRunningAndroidDeviceOrEmulator(device, emulator)) {
             await setEmulatorLocale(deviceId, locale, configDeviceName);
+            changeDemoMode(deviceId, true);
           }
           // set locale if ios simulator
           if ((device != null && device.platform == 'ios' && device.emulator) ||
@@ -372,6 +375,8 @@ class Screenshots {
         if (emulator != null) {
           await setEmulatorLocale(
               deviceId, origAndroidLocale, configDeviceName);
+          changeDemoMode(deviceId, false);
+          changeAndroidAnimationScale(deviceId, true);
           await shutdownAndroidEmulator(daemonClient, deviceId);
         }
         // if a simulator was started, revert locale if necessary and shut it down
@@ -555,6 +560,28 @@ void changeAndroidLocale(
     'ctl.restart',
     'zygote'
   ]);
+}
+
+void changeAndroidAnimationScale(String deviceId, bool enable) {
+  printStatus('${enable ? 'Enabling' : 'Disabling'} animations for device $deviceId');
+  final scale = enable ? "1.0" : "0.0";
+  utils.cmd([getAdbPath(androidSdk), '-s', deviceId, 'shell', 'settings', 'put', 'global', 'window_animation_scale', scale]);
+  utils.cmd([getAdbPath(androidSdk), '-s', deviceId, 'shell', 'settings', 'put', 'global', 'transition_animation_scale', scale]);
+  utils.cmd([getAdbPath(androidSdk), '-s', deviceId, 'shell', 'settings', 'put', 'global', 'animator_duration_scale', scale]);
+}
+
+void changeDemoMode(String deviceId, bool enable) {
+  if (enable) {
+    utils.cmd([getAdbPath(androidSdk), '-s', deviceId, 'shell', 'settings', 'put', 'global', 'sysui_demo_allowed', '1']);
+    utils.cmd([getAdbPath(androidSdk), '-s', deviceId, 'shell', 'am', 'broadcast', '-a', 'com.android.systemui.demo', '-e', 'command', 'enter']);
+    utils.cmd([getAdbPath(androidSdk), '-s', deviceId, 'shell', 'am', 'broadcast', '-a', 'com.android.systemui.demo', '-e', 'command', 'clock', '-e', 'hhmm', '0800']);
+    utils.cmd([getAdbPath(androidSdk), '-s', deviceId, 'shell', 'am', 'broadcast', '-a', 'com.android.systemui.demo', '-e', 'command', 'battery', '-e', 'level', '100']);
+    utils.cmd([getAdbPath(androidSdk), '-s', deviceId, 'shell', 'am', 'broadcast', '-a', 'com.android.systemui.demo', '-e', 'command', 'network', '-e', 'wifi', 'show', '-e', 'level', '4']);
+    utils.cmd([getAdbPath(androidSdk), '-s', deviceId, 'shell', 'am', 'broadcast', '-a', 'com.android.systemui.demo', '-e', 'command', 'network', '-e', 'mobile', 'show', '-e', 'datatype', 'lte', '-e', 'level', '4']);
+    utils.cmd([getAdbPath(androidSdk), '-s', deviceId, 'shell', 'am', 'broadcast', '-a', 'com.android.systemui.demo', '-e', 'command', 'notifications', '-e', 'visible', 'false']);
+  } else {
+    utils.cmd([getAdbPath(androidSdk), '-s', deviceId, 'shell', 'am', 'broadcast', '-a', 'com.android.systemui.demo', '-e', 'command', 'exit']);
+  }
 }
 
 /// Change locale of non-running simulator.
