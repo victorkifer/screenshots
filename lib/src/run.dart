@@ -284,107 +284,112 @@ class Screenshots {
           origIosLocale = utils.getIosSimulatorLocale(deviceId);
         }
 
-        changeAndroidAnimationScale(deviceId, false);
+        if (isRunningAndroidDeviceOrEmulator(device, emulator)) {
+          changeAnimationScale(deviceId, "android", false);
+        }
 
-        for (final locale in config.locales) {
-          // set locale if android device or emulator
-          if (isRunningAndroidDeviceOrEmulator(device, emulator)) {
-            await setEmulatorLocale(deviceId, locale, configDeviceName);
-            changeDemoMode(deviceId, true);
-          }
-          // set locale if ios simulator
-          if ((device != null && device.platform == 'ios' && device.emulator) ||
-              (device == null &&
-                  simulator != null &&
-                  !pendingIosLocaleChangeAtStart)) {
-            // an already running simulator or a started simulator
-            final localeChanged = await setSimulatorLocale(deviceId,
-                configDeviceName, locale, config.stagingDir, daemonClient);
-            if (localeChanged) {
-              // restart simulator
-              printStatus(
-                  'Restarting \'$configDeviceName\' due to locale change...');
-              await shutdownSimulator(config.stagingDir, deviceId);
-              await startSimulator(daemonClient, config.stagingDir, deviceId);
+        try {
+          for (final locale in config.locales) {
+            // set locale if android device or emulator
+            if (isRunningAndroidDeviceOrEmulator(device, emulator)) {
+              await setEmulatorLocale(deviceId, locale, configDeviceName);
+              changeDemoMode(deviceId, "android", true);
             }
-          }
-          if (pendingIosLocaleChangeAtStart) {
-            // a non-running simulator
-            await setSimulatorLocale(deviceId, configDeviceName, locale,
-                config.stagingDir, daemonClient);
-            printStatus('Starting $configDeviceName...');
-            await startSimulator(daemonClient, config.stagingDir, deviceId);
-            pendingIosLocaleChangeAtStart = false;
-          }
-
-          // Change orientation if required
-          final configDevice = config.getDevice(configDeviceName);
-          if (configDevice.orientations != null) {
-            for (final orientation in configDevice.orientations) {
-              final currentDevice =
-                  utils.getDeviceFromId(await daemonClient.devices, deviceId);
-              currentDevice == null
-                  ? throw 'Error: device \'$configDeviceName\' not found in flutter daemon.'
-                  : null;
-              switch (deviceType) {
-                case DeviceType.android:
-                  if (currentDevice.emulator) {
-                    changeDeviceOrientation(deviceType, orientation,
-                        deviceId: deviceId);
-                  } else {
-                    printStatus(
-                        'Warning: cannot change orientation of a real android device.');
-                  }
-                  break;
-                case DeviceType.ios:
-                  if (currentDevice.emulator) {
-                    changeDeviceOrientation(deviceType, orientation,
-                        scriptDir: '${config.stagingDir}/resources/script');
-                  } else {
-                    printStatus(
-                        'Warning: cannot change orientation of a real iOS device.');
-                  }
-                  break;
+            // set locale if ios simulator
+            if ((device != null && device.platform == 'ios' && device.emulator) ||
+                (device == null &&
+                    simulator != null &&
+                    !pendingIosLocaleChangeAtStart)) {
+              // an already running simulator or a started simulator
+              final localeChanged = await setSimulatorLocale(deviceId,
+                  configDeviceName, locale, config.stagingDir, daemonClient);
+              if (localeChanged) {
+                // restart simulator
+                printStatus(
+                    'Restarting \'$configDeviceName\' due to locale change...');
+                await shutdownSimulator(config.stagingDir, deviceId);
+                await startSimulator(daemonClient, config.stagingDir, deviceId);
               }
+            }
+            if (pendingIosLocaleChangeAtStart) {
+              // a non-running simulator
+              await setSimulatorLocale(deviceId, configDeviceName, locale,
+                  config.stagingDir, daemonClient);
+              printStatus('Starting $configDeviceName...');
+              await startSimulator(daemonClient, config.stagingDir, deviceId);
+              pendingIosLocaleChangeAtStart = false;
+            }
 
-              // store env for later use by tests
-              // ignore: invalid_use_of_visible_for_testing_member
-              await config.storeEnv(
-                  screens, deviceId, configDeviceName, locale, deviceType, orientation);
+            // Change orientation if required
+            final configDevice = config.getDevice(configDeviceName);
+            if (configDevice.orientations != null) {
+              for (final orientation in configDevice.orientations) {
+                final currentDevice =
+                    utils.getDeviceFromId(await daemonClient.devices, deviceId);
+                currentDevice == null
+                    ? throw 'Error: device \'$configDeviceName\' not found in flutter daemon.'
+                    : null;
+                switch (deviceType) {
+                  case DeviceType.android:
+                    if (currentDevice.emulator) {
+                      changeDeviceOrientation(deviceType, orientation,
+                          deviceId: deviceId);
+                    } else {
+                      printStatus(
+                          'Warning: cannot change orientation of a real android device.');
+                    }
+                    break;
+                  case DeviceType.ios:
+                    if (currentDevice.emulator) {
+                      changeDeviceOrientation(deviceType, orientation,
+                          scriptDir: '${config.stagingDir}/resources/script');
+                    } else {
+                      printStatus(
+                          'Warning: cannot change orientation of a real iOS device.');
+                    }
+                    break;
+                }
 
-              // run tests and process images
+                // store env for later use by tests
+                // ignore: invalid_use_of_visible_for_testing_member
+                await config.storeEnv(
+                    screens, deviceId, configDeviceName, locale, deviceType, orientation);
+
+                // run tests and process images
+                await runProcessTests(
+                  configDeviceName,
+                  locale,
+                  orientation,
+                  deviceType,
+                  deviceId,
+                );
+              }
+            } else {
               await runProcessTests(
                 configDeviceName,
                 locale,
-                orientation,
+                null,
                 deviceType,
                 deviceId,
               );
             }
-          } else {
-            await runProcessTests(
-              configDeviceName,
-              locale,
-              null,
-              deviceType,
-              deviceId,
-            );
           }
-        }
-        // if an emulator was started, revert locale if necessary and shut it down
-        if (emulator != null) {
-          await setEmulatorLocale(
-              deviceId, origAndroidLocale, configDeviceName);
-          changeDemoMode(deviceId, false);
-          changeAndroidAnimationScale(deviceId, true);
-          await shutdownAndroidEmulator(daemonClient, deviceId);
-        }
-        // if a simulator was started, revert locale if necessary and shut it down
-        if (simulator != null) {
-          // todo restore backup of GlobalPreferences.plist
-          await setSimulatorLocale(deviceId, configDeviceName, origIosLocale,
-              config.stagingDir, daemonClient);
-          await shutdownSimulator(config.stagingDir, deviceId);
+        } finally {
+          // if an emulator was started, revert locale if necessary and shut it down
+          if (emulator != null) {
+            await setEmulatorLocale(
+                deviceId, origAndroidLocale, configDeviceName);
+            changeDemoMode(deviceId, "android", false);
+            changeAnimationScale(deviceId, "android", true);
+            await shutdownAndroidEmulator(daemonClient, deviceId);
+          }
+          // if a simulator was started, revert locale if necessary and shut it down
+          if (simulator != null) {
+            // todo restore backup of GlobalPreferences.plist
+            await setSimulatorLocale(deviceId, configDeviceName, origIosLocale,
+                config.stagingDir, daemonClient);
+            await shutdownSimulator(config.stagingDir, deviceId);
+          }
         }
       }
     }
@@ -562,15 +567,24 @@ void changeAndroidLocale(
   ]);
 }
 
-void changeAndroidAnimationScale(String deviceId, bool enable) {
-  printStatus('${enable ? 'Enabling' : 'Disabling'} animations for device $deviceId');
+void changeAnimationScale(String deviceId, String platform, bool enable) {
+  if (platform != 'android') {
+    return;
+  }
+
+  printStatus('${enable ? 'Enabling' : 'Disabling'} animations for device ${deviceId}');
   final scale = enable ? "1.0" : "0.0";
   utils.cmd([getAdbPath(androidSdk), '-s', deviceId, 'shell', 'settings', 'put', 'global', 'window_animation_scale', scale]);
   utils.cmd([getAdbPath(androidSdk), '-s', deviceId, 'shell', 'settings', 'put', 'global', 'transition_animation_scale', scale]);
   utils.cmd([getAdbPath(androidSdk), '-s', deviceId, 'shell', 'settings', 'put', 'global', 'animator_duration_scale', scale]);
 }
 
-void changeDemoMode(String deviceId, bool enable) {
+void changeDemoMode(String deviceId, String platform, bool enable) {
+  if (platform != 'android') {
+    return;
+  }
+
+  printStatus('${enable ? 'Enabling' : 'Disabling'} demo mode for device ${deviceId}');
   if (enable) {
     utils.cmd([getAdbPath(androidSdk), '-s', deviceId, 'shell', 'settings', 'put', 'global', 'sysui_demo_allowed', '1']);
     utils.cmd([getAdbPath(androidSdk), '-s', deviceId, 'shell', 'am', 'broadcast', '-a', 'com.android.systemui.demo', '-e', 'command', 'enter']);
