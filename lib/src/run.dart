@@ -214,7 +214,7 @@ class Screenshots {
         if (emulator != null) {
           printStatus('Starting $configDeviceName...');
           deviceId =
-              await startEmulator(daemonClient, emulator.id, config.stagingDir);
+              await startEmulator(daemonClient, emulator, config.stagingDir);
         } else {
           // if no matching android emulator, look for matching ios simulator
           // and start it
@@ -447,14 +447,23 @@ Future<void> startSimulator(DaemonClient daemonClient, String stagingDir, String
 
 /// Start android emulator and return device id.
 Future<String> startEmulator(
-    DaemonClient daemonClient, String emulatorId, stagingDir) async {
+    DaemonClient daemonClient, DaemonEmulator emulator, stagingDir) async {
 //  if (utils.isCI()) {
 //    // testing on CI/CD requires starting emulator in a specific way
 //    await _startAndroidEmulatorOnCI(emulatorId, stagingDir);
 //    return utils.findAndroidDeviceId(emulatorId);
 //  } else {
     // testing locally, so start emulator in normal way
-    return await daemonClient.launchEmulator(emulatorId);
+    String id = await daemonClient.launchEmulator(emulator.id);
+
+    if (emulator.platformType == "android") {
+      await utils.streamCmd([
+        '$stagingDir/resources/script/android-wait-for-emulator',
+        id
+      ]);
+    }
+
+    return id;
 //  }
 }
 
