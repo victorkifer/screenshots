@@ -37,6 +37,17 @@ void changeDeviceOrientation(DeviceType deviceType, Orientation orientation,
         'settings',
         'put',
         'system',
+        'accelerometer_rotation',
+        '1'
+      ]);
+      cmd([
+        getAdbPath(androidSdk),
+        '-s',
+        deviceId,
+        'shell',
+        'settings',
+        'put',
+        'system',
         'user_rotation',
         androidOrientations[_orientation]
       ]);
