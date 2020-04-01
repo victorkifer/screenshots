@@ -1,5 +1,5 @@
 on run argv
-  my do_submenu("Simulator", "Hardware", "Orientation", item 1 of argv)
+  my do_submenu("Simulator", "Device", "Orientation", item 1 of argv)
   return item 1 of argv
 end run
 
