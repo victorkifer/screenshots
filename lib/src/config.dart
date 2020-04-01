@@ -75,6 +75,8 @@ class Config {
 
   String get archiveDir => _configInfo['archive'];
 
+  String get outputDir => _configInfo['outputDir'];
+
   /// Get all android and ios device names.
   List<String> get deviceNames => devices.map((device) => device.name).toList();
 

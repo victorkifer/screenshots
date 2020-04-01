@@ -15,7 +15,7 @@ Future clearFastlaneDirs(
     for (ConfigDevice device in config.androidDevices) {
       for (final locale in config.locales) {
         await _clearFastlaneDir(
-            screens, device.name, locale, DeviceType.android, runMode);
+            screens, device.name, config.outputDir, locale, DeviceType.android, runMode);
       }
     }
   }
@@ -23,19 +23,19 @@ Future clearFastlaneDirs(
     for (ConfigDevice device in config.iosDevices) {
       for (final locale in config.locales) {
         await _clearFastlaneDir(
-            screens, device.name, locale, DeviceType.ios, runMode);
+            screens, device.name, config.outputDir, locale, DeviceType.ios, runMode);
       }
     }
   }
 }
 
 /// Clear images destination.
-Future _clearFastlaneDir(Screens screens, String deviceName, String locale,
+Future _clearFastlaneDir(Screens screens, String deviceName, String dirPrefix, String locale,
     DeviceType deviceType, RunMode runMode) async {
   final Map screenProps = screens.getScreen(deviceName);
   String androidModelType = getAndroidModelType(screenProps, deviceName);
 
-  final dirPath = getDirPath(deviceType, locale, androidModelType);
+  final dirPath = getDirPath(deviceType, dirPrefix, locale, androidModelType);
 
   printStatus('Clearing images in $dirPath for \'$deviceName\'...');
   // delete images ending with .kImageExtension
@@ -58,17 +58,17 @@ const kFastlaneTenInch = 'tenInch';
 // android/fastlane/metadata/android/en-US/images/sevenInchScreenshots
 /// Generate fastlane dir path for ios or android.
 String getDirPath(
-    DeviceType deviceType, String locale, String androidModelType) {
+    DeviceType deviceType, String dirPrefix, String locale, String androidModelType) {
   locale = locale.replaceAll('_', '-'); // in case canonicalized
   const androidPrefix = 'android/fastlane/metadata/android';
   const iosPrefix = 'ios/fastlane/screenshots';
   String dirPath;
   switch (deviceType) {
     case DeviceType.android:
-      dirPath = '$androidPrefix/$locale/images/${androidModelType}Screenshots';
+      dirPath = '${dirPrefix != null ? dirPrefix : androidPrefix}/$locale/images/${androidModelType}Screenshots';
       break;
     case DeviceType.ios:
-      dirPath = '$iosPrefix/$locale';
+      dirPath = '${dirPrefix != null ? dirPrefix : iosPrefix}/$locale';
   }
   return dirPath;
 }

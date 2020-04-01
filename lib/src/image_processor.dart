@@ -88,7 +88,7 @@ class ImageProcessor {
     // move to final destination for upload to stores via fastlane
     if (screenshotPaths.isNotEmpty) {
       final androidModelType = fastlane.getAndroidModelType(screenProps, deviceName);
-      String dstDir = fastlane.getDirPath(deviceType, locale, androidModelType);
+      String dstDir = fastlane.getDirPath(deviceType, _config.outputDir, locale, androidModelType);
       runMode == RunMode.recording
           ? dstDir = '${_config.recordingDir}/$dstDir'
           : null;
