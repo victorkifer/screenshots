@@ -1,0 +1,20 @@
+# Use the analysis options settings from the top level of the repo (not
+# the ones from above, which include the `public_member_api_docs` rule).
+
+include: ./analysis_options_global.yml
+
+analyzer:
+  strong-mode:
+    implicit-casts: true
+    implicit-dynamic: false
+  exclude:
+    - "test/src/**"
+    - "example/**"
+    - "test/base/all_tests.dart"
+
+linter:
+  rules:
+    unawaited_futures: true
+    avoid_as: false # Disabled so we can gradually migrate to no implicit dynamic.
+    avoid_bool_literals_in_conditional_expressions: false
+#    always_put_control_body_on_new_line: ignore
