@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:test/test.dart';
-import 'package:tool_base/tool_base.dart';
+import 'package:screenshots/tool_base/tool_base.dart';
 
 //import 'common_tools.dart' as common show isInstanceOf;
 

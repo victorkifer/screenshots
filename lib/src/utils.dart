@@ -5,8 +5,8 @@ import 'dart:convert';
 import 'package:path/path.dart' as p;
 import 'package:process/process.dart';
 import 'package:screenshots/src/daemon_client.dart';
-import 'package:tool_base/tool_base.dart';
-import 'package:tool_mobile/tool_mobile.dart';
+import 'package:screenshots/tool_base/tool_base.dart';
+import 'package:screenshots/tool_mobile/tool_mobile.dart';
 import 'package:yaml/yaml.dart';
 
 import 'context_runner.dart';

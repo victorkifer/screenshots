@@ -1,5 +1,5 @@
-import 'package:tool_base/tool_base.dart';
-import 'package:tool_mobile/tool_mobile.dart';
+import 'package:screenshots/tool_base/tool_base.dart';
+import 'package:screenshots/tool_mobile/tool_mobile.dart';
 
 import 'globals.dart';
 import 'utils.dart' as utils;

@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 import 'package:screenshots/src/daemon_client.dart';
-import 'package:tool_base/tool_base.dart' hide Config;
+import 'package:screenshots/tool_base/tool_base.dart' hide Config;
 
 import 'config.dart';
 import 'globals.dart';

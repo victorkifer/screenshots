@@ -5,7 +5,7 @@ import 'package:resource/resource.dart';
 
 import 'utils.dart';
 
-import 'package:tool_base/tool_base.dart';
+import 'package:screenshots/tool_base/tool_base.dart';
 
 ///
 /// Copy resource images for a screen from package to files.

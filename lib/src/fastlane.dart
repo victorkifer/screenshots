@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:screenshots/src/image_magick.dart';
-import 'package:tool_base/tool_base.dart' hide Config;
+import 'package:screenshots/tool_base/tool_base.dart' hide Config;
 
 import 'config.dart';
 import 'screens.dart';

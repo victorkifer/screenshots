@@ -3,7 +3,7 @@ import 'dart:convert';
 
 import 'package:meta/meta.dart';
 import 'package:screenshots/src/utils.dart';
-import 'package:tool_base/tool_base.dart';
+import 'package:screenshots/tool_base/tool_base.dart';
 
 final DaemonClient _kDaemonClient = DaemonClient();
 

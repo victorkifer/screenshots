@@ -1,4 +1,4 @@
-import 'package:fake_process_manager/fake_process_manager.dart';
+import 'fake_process_manager/fake_process_manager.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 import 'package:screenshots/src/context_runner.dart';
@@ -7,7 +7,7 @@ import 'package:screenshots/src/image_magick.dart';
 import 'package:screenshots/src/image_processor.dart';
 import 'package:screenshots/src/utils.dart';
 import 'package:test/test.dart';
-import 'package:tool_base/tool_base.dart';
+import 'package:screenshots/tool_base/tool_base.dart';
 
 import 'src/context.dart';
 

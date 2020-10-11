@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:path/path.dart' as p;
 import 'package:screenshots/src/utils.dart';
-import 'package:tool_base/tool_base.dart';
+import 'package:screenshots/tool_base/tool_base.dart';
 
 import 'context_runner.dart';
 

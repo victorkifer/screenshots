@@ -5,7 +5,7 @@ import 'package:path/path.dart' as p;
 import 'package:screenshots/src/config.dart';
 import 'package:screenshots/src/image_magick.dart';
 import 'package:screenshots/src/orientation.dart';
-import 'package:tool_base/tool_base.dart' hide Config;
+import 'package:screenshots/tool_base/tool_base.dart' hide Config;
 
 import 'archive.dart';
 import 'fastlane.dart' as fastlane;

@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:screenshots/src/context_runner.dart';
 import 'package:test/test.dart';
-import 'package:tool_base/tool_base.dart';
+import 'package:screenshots/tool_base/tool_base.dart';
 
 import 'common_tools.dart';
 

@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
-import 'package:tool_base/tool_base.dart' hide Config;
-import 'package:tool_mobile/tool_mobile.dart';
+import 'package:screenshots/tool_base/tool_base.dart' hide Config;
+import 'package:screenshots/tool_mobile/tool_mobile.dart';
 
 import 'archive.dart';
 import 'config.dart';
